@@ -1,0 +1,2006 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How AI Works</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f3f6f8;
+        --ink: #111827;
+        --muted: #5c6877;
+        --line: #d9e1e8;
+        --panel: #ffffff;
+        --panel-soft: #eef3f6;
+        --dark: #17202b;
+        --dark-2: #253241;
+        --green: #167a44;
+        --green-bg: #e8f7ee;
+        --red: #b42c31;
+        --red-bg: #ffe8e9;
+        --amber: #9a5a00;
+        --amber-bg: #fff3d6;
+        --blue: #1f5f9d;
+        --blue-bg: #e7f0ff;
+        --shadow: 0 16px 36px rgba(21, 31, 46, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      .app {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0;
+      }
+
+      .stack {
+        display: grid;
+        gap: 22px;
+      }
+
+      .hero {
+        overflow: hidden;
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 36%),
+          var(--dark);
+        color: white;
+        box-shadow: var(--shadow);
+        padding: clamp(24px, 4vw, 42px);
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 860px;
+        font-size: clamp(2.3rem, 5vw, 4.8rem);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        font-size: clamp(1.55rem, 2.2vw, 2.15rem);
+        letter-spacing: 0;
+      }
+
+      h3 {
+        font-size: 1.25rem;
+        letter-spacing: 0;
+      }
+
+      h4 {
+        font-size: 1rem;
+      }
+
+      .hero p,
+      .lede {
+        margin-top: 14px;
+        max-width: 900px;
+        color: #d8e0e8;
+        font-size: 1.04rem;
+        line-height: 1.6;
+      }
+
+      .lede {
+        color: var(--muted);
+      }
+
+      .section {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .section-body {
+        padding: clamp(18px, 2.4vw, 26px);
+      }
+
+      .choice-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .choice {
+        min-height: 92px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        gap: 8px;
+        padding: 14px;
+        text-align: center;
+        transition:
+          background 160ms ease,
+          border-color 160ms ease,
+          color 160ms ease,
+          transform 160ms ease;
+      }
+
+      .choice:hover {
+        transform: translateY(-1px);
+      }
+
+      .choice.active,
+      .pill.active {
+        border-color: var(--dark);
+        background: var(--dark);
+        color: white;
+      }
+
+      .choice .emoji {
+        font-size: 3rem;
+        line-height: 1;
+      }
+
+      .choice .label {
+        font-weight: 750;
+      }
+
+      .token-choice {
+        min-height: 88px;
+        justify-items: start;
+        text-align: left;
+      }
+
+      .two-one {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+        gap: 16px;
+        margin-top: 22px;
+      }
+
+      .pixel-panel {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.4fr);
+        gap: 18px;
+        align-items: center;
+        margin-top: 22px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-soft);
+        padding: 18px;
+      }
+
+      .pixel-subject {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .pixel-subject .emoji {
+        display: grid;
+        width: 64px;
+        aspect-ratio: 1;
+        place-items: center;
+        border-radius: 8px;
+        background: white;
+        font-size: 2.6rem;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .pixel-subject small {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+      }
+
+      .pixel-workbench {
+        display: grid;
+        grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+        gap: 18px;
+        align-items: center;
+      }
+
+      .pixel-grid {
+        display: grid;
+        aspect-ratio: 1;
+        gap: 3px;
+        width: 100%;
+        padding: 8px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .pixel {
+        border-radius: 3px;
+        box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
+      }
+
+      .pixel-numbers {
+        display: grid;
+        gap: 10px;
+      }
+
+      .sample-row {
+        display: grid;
+        grid-template-columns: 18px minmax(74px, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.88rem;
+      }
+
+      .sample-swatch {
+        width: 18px;
+        aspect-ratio: 1;
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.16);
+      }
+
+      .sample-value {
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono",
+          monospace;
+        color: var(--dark);
+        white-space: nowrap;
+      }
+
+      .half-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 22px;
+      }
+
+      .one-two {
+        margin-top: 22px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+      }
+
+      .card-body {
+        padding: 18px;
+      }
+
+      .feature-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .feature-head p,
+      .subtle {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.45;
+      }
+
+      .big-emoji {
+        flex: 0 0 auto;
+        font-size: 4.25rem;
+        line-height: 1;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      table {
+        width: 100%;
+        min-width: 700px;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+      }
+
+      th,
+      td {
+        padding: 13px 14px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel-soft);
+        font-weight: 800;
+      }
+
+      tbody tr + tr {
+        border-top: 1px solid #edf1f5;
+      }
+
+      td:first-child {
+        font-weight: 750;
+      }
+
+      .vote {
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono",
+          monospace;
+        font-weight: 850;
+        white-space: nowrap;
+      }
+
+      .positive {
+        color: var(--green);
+      }
+
+      .negative {
+        color: var(--red);
+      }
+
+      .bars {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .bar-row {
+        display: grid;
+        gap: 6px;
+      }
+
+      .bar-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 0.92rem;
+      }
+
+      .bar-label {
+        font-weight: 800;
+      }
+
+      .bar-value {
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      .bar-track {
+        height: 16px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #dce4eb;
+      }
+
+      .bar-fill {
+        height: 100%;
+        min-width: 2px;
+        border-radius: 999px;
+        background: var(--dark-2);
+        transition: width 340ms ease;
+      }
+
+      .bar-fill.alt {
+        background: #697a8c;
+      }
+
+      .result {
+        margin-top: 20px;
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .result.ok {
+        background: var(--green-bg);
+        color: #0f5130;
+      }
+
+      .result.bad {
+        background: var(--red-bg);
+        color: #7f1d1d;
+      }
+
+      .eyebrow {
+        font-size: 0.76rem;
+        font-weight: 850;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .prediction {
+        margin-top: 4px;
+        font-size: clamp(2.1rem, 4vw, 3.1rem);
+        font-weight: 950;
+        line-height: 1;
+        overflow-wrap: anywhere;
+      }
+
+      .note {
+        margin-top: 22px;
+        border-radius: 8px;
+        background: var(--amber-bg);
+        color: #5d3800;
+        padding: 18px;
+      }
+
+      .note p {
+        margin-top: 8px;
+        font-size: 0.94rem;
+        line-height: 1.5;
+      }
+
+      .weight-slider {
+        margin-top: 18px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.62);
+        padding: 18px;
+      }
+
+      .weight-slider input[type="range"] {
+        width: 100%;
+        accent-color: var(--dark);
+        cursor: pointer;
+      }
+
+      .slider-labels {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .slider-label {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        cursor: pointer;
+        min-height: 44px;
+        padding: 10px 12px;
+        font-weight: 750;
+        transition:
+          background 160ms ease,
+          border-color 160ms ease,
+          color 160ms ease;
+      }
+
+      .slider-label.active {
+        border-color: var(--dark);
+        background: var(--dark);
+        color: white;
+      }
+
+      .mode-summary {
+        margin-top: 14px;
+        color: #5d3800;
+      }
+
+      .pill-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .inline-control {
+        margin-top: 18px;
+        border-radius: 8px;
+        background: var(--panel-soft);
+        padding: 16px;
+      }
+
+      .pill {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        cursor: pointer;
+        min-height: 44px;
+        padding: 10px 14px;
+        font-weight: 750;
+        transition:
+          background 160ms ease,
+          border-color 160ms ease,
+          color 160ms ease;
+      }
+
+      .prompt-box {
+        margin-top: 14px;
+        border-radius: 8px;
+        background: var(--panel-soft);
+        padding: 22px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono",
+          monospace;
+        font-size: clamp(1rem, 2vw, 1.35rem);
+        line-height: 1.45;
+      }
+
+      .info-box,
+      .repeat-box {
+        margin-top: 20px;
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .info-box {
+        background: var(--blue-bg);
+        color: #113e70;
+        font-size: 0.94rem;
+        line-height: 1.5;
+      }
+
+      .repeat-box {
+        background: var(--panel-soft);
+      }
+
+      .repeat-box p + p {
+        margin-top: 8px;
+        color: var(--muted);
+      }
+
+      .takeaway {
+        color: var(--dark);
+        font-size: clamp(1.15rem, 2vw, 1.45rem);
+        font-weight: 950;
+        line-height: 1.35;
+      }
+
+      .concept-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .concept {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 16px;
+      }
+
+      .concept h4 {
+        color: var(--dark);
+      }
+
+      .concept p {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+
+      .token-steps {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .step-card {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 14px;
+      }
+
+      .step-number {
+        display: grid;
+        width: 30px;
+        aspect-ratio: 1;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--dark);
+        color: white;
+        font-weight: 850;
+      }
+
+      .step-card p {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+
+      .math-strip {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .formula-work {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        align-items: stretch;
+        margin-top: 16px;
+      }
+
+      .formula {
+        display: grid;
+        place-items: center;
+        min-height: 140px;
+        border-radius: 8px;
+        background: white;
+        font-family: Georgia, "Times New Roman", serif;
+        overflow: hidden;
+        padding: 14px;
+        font-size: clamp(1.4rem, 3vw, 2.25rem);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .formula math {
+        font-size: inherit;
+      }
+
+      .equation {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.32em;
+        max-width: 100%;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .fraction {
+        display: inline-grid;
+        grid-template-rows: auto auto;
+        align-items: center;
+        min-width: 4.3em;
+        text-align: center;
+      }
+
+      .fraction .top {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.18em 0.16em;
+      }
+
+      .fraction .bottom {
+        padding: 0.16em 0.18em 0;
+      }
+
+      .sup {
+        position: relative;
+        top: -0.45em;
+        font-size: 0.5em;
+      }
+
+      .token-math {
+        margin-top: 18px;
+      }
+
+      .token-math .formula {
+        min-height: 112px;
+        font-size: clamp(0.98rem, 1.8vw, 1.35rem);
+      }
+
+      .worked-calc {
+        display: grid;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 16px;
+      }
+
+      .calc-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid #edf1f5;
+        padding-bottom: 8px;
+        font-size: 0.92rem;
+      }
+
+      .calc-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .calc-row b,
+      .calc-row code {
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      .calc-result {
+        color: var(--green);
+        font-weight: 900;
+      }
+
+      .mini-table {
+        width: 100%;
+        min-width: 0;
+        margin-top: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+        font-size: 0.88rem;
+      }
+
+      .mini-table div {
+        display: grid;
+        grid-template-columns: 0.8fr 1fr;
+      }
+
+      .mini-table span {
+        padding: 10px 12px;
+      }
+
+      .mini-table div + div {
+        border-top: 1px solid #edf1f5;
+      }
+
+      .mini-table b {
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      .explain-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .explain {
+        border: 1px solid #edf1f5;
+        border-radius: 8px;
+        background: white;
+        padding: 16px;
+      }
+
+      .explain p {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.45;
+      }
+
+      .hallucination-layout {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .cause-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .cause-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        cursor: pointer;
+        padding: 14px;
+        text-align: left;
+        transition:
+          background 160ms ease,
+          border-color 160ms ease,
+          color 160ms ease;
+      }
+
+      .cause-card.active {
+        border-color: var(--dark);
+        background: var(--dark);
+        color: white;
+      }
+
+      .cause-card p {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .cause-card.active p {
+        color: #d8e0e8;
+      }
+
+      .cause-detail {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-soft);
+        padding: 18px;
+      }
+
+      .cause-detail p {
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .example-box {
+        margin-top: 16px;
+        border-radius: 8px;
+        background: white;
+        padding: 16px;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .example-box p + p {
+        margin-top: 10px;
+      }
+
+      .review-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .review-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 16px;
+      }
+
+      .review-card p {
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .review-card button {
+        margin-top: 14px;
+      }
+
+      .answer-panel {
+        display: none;
+        margin-top: 14px;
+        border-radius: 8px;
+        background: var(--green-bg);
+        color: #0f5130;
+        padding: 14px;
+      }
+
+      .review-card.open .answer-panel {
+        display: block;
+      }
+
+      @media (max-width: 880px) {
+        .choice-grid,
+        .pill-grid,
+        .slider-labels,
+        .two-one,
+        .half-grid,
+        .concept-grid,
+        .pixel-panel,
+        .pixel-workbench,
+        .formula-work,
+        .math-strip,
+        .one-two,
+        .hallucination-layout,
+        .review-grid,
+        .explain-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .feature-head {
+          align-items: flex-start;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .app {
+          width: min(100% - 22px, 1180px);
+          padding: 12px 0;
+        }
+
+        .hero,
+        .section-body,
+        .card-body,
+        .note {
+          padding: 16px;
+        }
+
+        .choice {
+          min-height: 82px;
+        }
+
+        .choice .emoji {
+          font-size: 2.4rem;
+        }
+
+        .big-emoji {
+          font-size: 3.3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app stack">
+      <header class="hero">
+        <h1>How AI Works</h1>
+        <p>
+          AI does not literally "know" what it is seeing or saying. It turns
+          information into numbers, scores possible answers, and chooses likely
+          outputs. That is powerful, but it also explains why AI can
+          hallucinate.
+        </p>
+      </header>
+
+      <section class="section">
+        <div class="section-body">
+          <h2>Part 1: Image classification as evidence</h2>
+          <p class="lede">
+            The image model acts like a group of tiny detectives. Each
+            detective looks for one kind of clue. The clues become votes, and
+            the votes become probabilities.
+          </p>
+
+          <div id="imageChoices" class="choice-grid"></div>
+
+          <div class="pixel-panel">
+            <div>
+              <p class="eyebrow">Before clues</p>
+              <h3>What the machine sees</h3>
+              <p class="subtle">
+                Your eyes see the whole picture at once. The model starts with
+                tiny colored squares, then turns those pixels into numbers.
+                This simplified map shows the idea before it looks for ears,
+                eyes, texture, and shape.
+              </p>
+              <div class="pixel-subject">
+                <span id="pixelEmoji" class="emoji" aria-hidden="true"></span>
+                <span>
+                  <b id="pixelName"></b>
+                  <small>Selected example</small>
+                </span>
+              </div>
+            </div>
+            <div class="pixel-workbench">
+              <div id="pixelGrid" class="pixel-grid" role="img"></div>
+              <div class="pixel-numbers">
+                <h4>Sample pixel values</h4>
+                <p class="subtle">
+                  Each color can be stored as red, green, and blue numbers from
+                  0 to 255.
+                </p>
+                <div id="pixelSamples" class="pixel-numbers"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="note">
+            <h3>Choose how the model weighs clues</h3>
+            <p>
+              Weights are the numbers that tell the model how much each clue
+              should matter. A strong weight makes a clue push the answer a lot;
+              a weak weight makes it barely count. Move the slider to see how
+              better or worse weights change the prediction.
+            </p>
+            <div class="weight-slider">
+              <input
+                id="modeSlider"
+                type="range"
+                min="0"
+                max="2"
+                step="1"
+                value="0"
+                aria-label="Choose how reliable the model weights are"
+              />
+              <div id="modeChoices" class="slider-labels"></div>
+            </div>
+            <p id="modeSummary" class="mode-summary"></p>
+          </div>
+
+          <div class="two-one">
+            <article class="card">
+              <div class="card-body">
+                <div class="feature-head">
+                  <div>
+                    <h3>Feature detectors</h3>
+                    <p>
+                      Fixed example weights: students see reliable correct
+                      results and one useful hallucination case.
+                    </p>
+                  </div>
+                  <div id="featureEmoji" class="big-emoji" aria-hidden="true"></div>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Detector</th>
+                        <th>Match</th>
+                        <th>Vote</th>
+                        <th>Plain-English meaning</th>
+                      </tr>
+                    </thead>
+                    <tbody id="clueRows"></tbody>
+                  </table>
+                </div>
+              </div>
+            </article>
+
+            <aside class="card">
+              <div class="card-body">
+                <h3>Probabilities</h3>
+                <p class="subtle">
+                  The model compares possible answers. The highest probability
+                  wins.
+                </p>
+                <div id="classBars" class="bars"></div>
+                <div id="classResult" class="result"></div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="math-strip">
+            <div class="card">
+              <div class="card-body">
+                <h3>How image scores become probabilities</h3>
+                <p class="subtle">
+                  The detector votes create scores for each label. A softmax
+                  calculation turns those scores into a 0 to 100% scale, so
+                  CAT, DOG, FOX, and OTHER can be compared.
+                </p>
+                <div class="formula-work">
+                  <div class="formula" aria-label="P CAT equals e to CAT score divided by e to CAT plus e to DOG plus e to FOX plus e to OTHER">
+                    <span class="equation" aria-hidden="true">
+                      <span>P(CAT)</span>
+                      <span>=</span>
+                      <span class="fraction">
+                        <span class="top">e<span class="sup">CAT score</span></span>
+                        <span class="bottom">e<span class="sup">CAT</span> + e<span class="sup">DOG</span> + e<span class="sup">FOX</span> + e<span class="sup">OTHER</span></span>
+                      </span>
+                    </span>
+                  </div>
+                  <div class="worked-calc" id="workedCalc"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <h3>Score effect</h3>
+                <div class="mini-table" aria-label="Score to probability examples">
+                  <div><span><b>+6</b></span><span>Much stronger than lower scores</span></div>
+                  <div><span><b>+2</b></span><span>Helpful evidence</span></div>
+                  <div><span><b>0</b></span><span>Uncertain</span></div>
+                  <div><span><b>-2</b></span><span>Weak evidence</span></div>
+                  <div><span><b>-6</b></span><span>Much less likely than higher scores</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="concept-grid" aria-label="Image classification summary">
+            <div class="concept">
+              <h4>What just happened?</h4>
+              <p>
+                Tiny detectors looked for patterns such as ears, eyes, texture,
+                and shape.
+              </p>
+            </div>
+            <div class="concept">
+              <h4>Each clue cast a vote</h4>
+              <p>
+                Strong matches pushed an answer up. Bad matches pushed it down.
+              </p>
+            </div>
+            <div class="concept">
+              <h4>Votes became probabilities</h4>
+              <p>
+                The model compared all possible labels and picked the highest
+                probability.
+              </p>
+            </div>
+            <div class="concept">
+              <h4>Confidence is still a score</h4>
+              <p>
+                A high number means the model is confident, not guaranteed to
+                be correct.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-body">
+          <h2>Part 2: Language models predict the next token</h2>
+          <p class="lede">
+            ChatGPT-style models do something similar, but with words or
+            word-pieces instead of image labels. A token is a small chunk of
+            text: it might be a whole word, part of a word, a number, or a
+            punctuation mark. The model predicts which token is most likely to
+            come next. The temperature setting below changes this probability
+            distribution, so watch the bars shift as you choose a preset.
+          </p>
+
+          <div id="tokenChoices" class="choice-grid"></div>
+
+          <div class="half-grid">
+            <article class="card">
+              <div class="card-body">
+                <h3>Prompt</h3>
+                <div id="promptBox" class="prompt-box"></div>
+                <p id="tokenExplanation" class="subtle"></p>
+                <div class="info-box">
+                  <p>
+                    <b>Key idea:</b> Unless it is connected to tools or sources,
+                    the model does not first check a truth database. It produces
+                    likely continuations based on patterns learned during
+                    training.
+                  </p>
+                </div>
+                <div class="token-steps" id="tokenSteps"></div>
+              </div>
+            </article>
+
+            <aside class="card">
+              <div class="card-body">
+                <h3>Probability distribution</h3>
+                <p class="subtle">
+                  There is not one possible next word. There are many, each
+                  with a probability.
+                </p>
+                <div class="inline-control">
+                  <h4>Temperature changes these bars</h4>
+                  <p class="subtle">
+                    Lower temperature makes the top answer dominate. Higher
+                    temperature gives less likely answers more room to appear.
+                  </p>
+                  <div id="temperatureChoices" class="pill-grid"></div>
+                </div>
+                <div class="token-math">
+                  <h4>Token temperature math</h4>
+                  <p class="subtle">
+                    Temperature reweights every possible next token, then the
+                    model normalizes the numbers back into probabilities.
+                  </p>
+                  <div class="formula-work">
+                    <div
+                      class="formula"
+                      aria-label="Adjusted token probability equals original probability to one over temperature divided by the sum of all adjusted token probabilities"
+                    >
+                      <math display="block">
+                        <msub>
+                          <mi>p</mi>
+                          <mi>T</mi>
+                        </msub>
+                        <mo>=</mo>
+                        <mfrac>
+                          <msup>
+                            <mi>p</mi>
+                            <mrow>
+                              <mn>1</mn>
+                              <mo>/</mo>
+                              <mi>T</mi>
+                            </mrow>
+                          </msup>
+                          <mrow>
+                            <mo>Σ</mo>
+                            <msup>
+                              <mi>p</mi>
+                              <mrow>
+                                <mn>1</mn>
+                                <mo>/</mo>
+                                <mi>T</mi>
+                              </mrow>
+                            </msup>
+                          </mrow>
+                        </mfrac>
+                      </math>
+                    </div>
+                    <div id="tokenCalc" class="worked-calc"></div>
+                  </div>
+                </div>
+                <div id="tokenBars" class="bars"></div>
+                <div id="tokenResult" class="result"></div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="one-two">
+            <article class="card">
+              <div class="card-body">
+                <h3>Why text predictions can hallucinate</h3>
+                <p class="subtle">
+                  The model is still choosing likely tokens, not automatically
+                  checking a truth database. Temperature changes how adventurous
+                  that choice is: lower temperature is more predictable, and
+                  higher temperature is more creative but riskier.
+                </p>
+                <div class="hallucination-layout">
+                  <div>
+                    <h4>Click a cause</h4>
+                    <div id="hallucinationChoices" class="cause-list"></div>
+                  </div>
+                  <div id="hallucinationDetail" class="cause-detail"></div>
+                </div>
+
+                <div class="repeat-box">
+                  <p class="takeaway"><strong>AI predicts what is likely. It does not automatically verify what is true.</strong></p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-body">
+          <h2>Practice cards</h2>
+          <p class="lede">
+            Use these to check whether the main ideas are sticking. Try to
+            answer before revealing the card.
+          </p>
+          <div id="reviewCards" class="review-grid"></div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const examples = {
+        cat: {
+          name: "Cat",
+          emoji: "🐱",
+          correct: "CAT",
+          clueVotes: [
+            ["Pointy ears", "Strong match", 2.4, "This pushes the model toward CAT."],
+            ["Forward-facing eyes", "Strong match", 2.1, "Cats often have centered, bright eyes."],
+            ["Whisker contrast", "Moderate match", 1.2, "Thin line-like contrast is cat-like."],
+            ["Fur texture", "Moderate match", 0.8, "Texture supports the animal guess."],
+            ["Floppy ears", "No match", -1.8, "This pushes away from DOG."],
+            ["Dog-like nose shape", "No match", -1.0, "Less evidence for dog."],
+          ],
+          classScores: { CAT: 3.7, DOG: 1.1, FOX: -0.2, OTHER: -1.1 },
+        },
+        dog: {
+          name: "Dog",
+          emoji: "🐶",
+          correct: "DOG",
+          clueVotes: [
+            ["Pointy ears", "Weak match", 0.3, "Some dogs still have ear-like upper shapes."],
+            ["Forward-facing eyes", "Moderate match", 0.6, "Many animals share this clue."],
+            ["Whisker contrast", "Weak match", 0.2, "Not very cat-specific."],
+            ["Fur texture", "Weak match", 0.1, "Fur alone is not enough."],
+            ["Floppy ears", "Strong match", -2.6, "This pushes strongly against CAT."],
+            ["Dog-like nose shape", "Strong match", -2.2, "This supports DOG instead of CAT."],
+          ],
+          classScores: { CAT: -3.6, DOG: 4.0, FOX: 0.2, OTHER: -0.8 },
+        },
+        fox: {
+          name: "Fox / tricky case",
+          emoji: "🦊",
+          correct: "FOX",
+          clueVotes: [
+            ["Pointy ears", "Strong match", 2.0, "This looks cat-like to the model."],
+            ["Forward-facing eyes", "Moderate match", 1.0, "This also pushes toward CAT."],
+            ["Whisker contrast", "Weak match", 0.4, "A weak cat-like clue."],
+            ["Fur texture", "Strong match", 1.1, "Fur is not specific enough."],
+            ["Floppy ears", "No match", -0.4, "Not much dog evidence."],
+            ["Dog-like nose shape", "Moderate match", -0.8, "Some counterevidence."],
+          ],
+          classScores: { CAT: 2.4, DOG: 0.9, FOX: 2.0, OTHER: -0.7 },
+        },
+        mug: {
+          name: "Mug",
+          emoji: "☕",
+          correct: "OTHER",
+          clueVotes: [
+            ["Pointy ears", "No match", -0.4, "No animal ear pattern."],
+            ["Forward-facing eyes", "No match", -0.6, "No eye pattern."],
+            ["Whisker contrast", "No match", -0.3, "No whisker-like lines."],
+            ["Fur texture", "No match", -0.7, "Smooth object, not fur."],
+            ["Floppy ears", "No match", -0.2, "No dog-like ears either."],
+            ["Dog-like nose shape", "No match", -0.2, "No animal nose."],
+          ],
+          classScores: { CAT: -2.4, DOG: -1.8, FOX: -1.2, OTHER: 2.7 },
+        },
+      };
+
+      const pixelMaps = {
+        cat: {
+          rows: [
+            "..O....O..",
+            ".OOO..OOO.",
+            ".OOOOOOOO.",
+            "OOOODDOOOO",
+            "OOOOOOOOOO",
+            "OOOOPPOOOO",
+            "OOOODDOOOO",
+            ".OOOOOOOO.",
+            "..OOOOOO..",
+            "...OOOO...",
+          ],
+          palette: {
+            ".": "#f8fafc",
+            O: "#f3b44d",
+            D: "#51351f",
+            P: "#db5a70",
+          },
+          samples: [
+            ["fur", "rgb(243, 180, 77)", "#f3b44d"],
+            ["eye", "rgb(81, 53, 31)", "#51351f"],
+            ["nose", "rgb(219, 90, 112)", "#db5a70"],
+            ["background", "rgb(248, 250, 252)", "#f8fafc"],
+          ],
+        },
+        dog: {
+          rows: [
+            "B........B",
+            "BB......BB",
+            "BTTTTTTTTB",
+            "BTTDDDDTTB",
+            "TTTTTTTTTT",
+            "TTTTPPTTTT",
+            "TTTTDDTTTT",
+            ".TTTTTTTT.",
+            "..TTTTTT..",
+            "...BBBB...",
+          ],
+          palette: {
+            ".": "#f8fafc",
+            B: "#7a5147",
+            T: "#c99b72",
+            D: "#3f2a24",
+            P: "#d66d85",
+          },
+          samples: [
+            ["ear", "rgb(122, 81, 71)", "#7a5147"],
+            ["fur", "rgb(201, 155, 114)", "#c99b72"],
+            ["nose", "rgb(63, 42, 36)", "#3f2a24"],
+            ["tongue", "rgb(214, 109, 133)", "#d66d85"],
+          ],
+        },
+        fox: {
+          rows: [
+            "..O....O..",
+            ".OOO..OOO.",
+            "OOOOOOOOOO",
+            "OOODDDDOOO",
+            "OOOWWWWWOO",
+            "OOWWWWWWOO",
+            "OOOWDDWOOO",
+            ".OOOWWOOO.",
+            "..OOOOOO..",
+            "...OOOO...",
+          ],
+          palette: {
+            ".": "#f8fafc",
+            O: "#e9802a",
+            D: "#4c2e1c",
+            W: "#fff2d6",
+          },
+          samples: [
+            ["orange fur", "rgb(233, 128, 42)", "#e9802a"],
+            ["white fur", "rgb(255, 242, 214)", "#fff2d6"],
+            ["eye", "rgb(76, 46, 28)", "#4c2e1c"],
+            ["background", "rgb(248, 250, 252)", "#f8fafc"],
+          ],
+        },
+        mug: {
+          rows: [
+            "..........",
+            "..MMMMMM..",
+            ".MMMMMMMC.",
+            ".MKKKKMMC.",
+            ".MKKKKMMC.",
+            ".MKKKKMMC.",
+            ".MMMMMMMC.",
+            "..MMMMMM..",
+            "...SSSS...",
+            "..........",
+          ],
+          palette: {
+            ".": "#f8fafc",
+            M: "#9a97c9",
+            K: "#634238",
+            C: "#c3c2dd",
+            S: "#7a779f",
+          },
+          samples: [
+            ["ceramic", "rgb(154, 151, 201)", "#9a97c9"],
+            ["coffee", "rgb(99, 66, 56)", "#634238"],
+            ["handle", "rgb(195, 194, 221)", "#c3c2dd"],
+            ["shadow", "rgb(122, 119, 159)", "#7a779f"],
+          ],
+        },
+      };
+
+      const tokenExamples = {
+        peanut: {
+          prompt: "Peanut butter and ___",
+          explanation:
+            "A familiar phrase. The model has seen this pattern many times, so the top answer is very strong.",
+          options: [
+            ["jelly", 0.92, true],
+            ["bananas", 0.04, false],
+            ["crackers", 0.02, false],
+            ["sandwich", 0.015, false],
+            ["concrete", 0.005, false],
+          ],
+        },
+        france: {
+          prompt: "The capital of France is ___",
+          explanation:
+            "This is a stable fact with strong evidence in training data. High probability is also correct here.",
+          options: [
+            ["Paris", 0.97, true],
+            ["Lyon", 0.02, false],
+            ["Marseille", 0.007, false],
+            ["Toulouse", 0.003, false],
+          ],
+        },
+        lumeria: {
+          prompt: "The capital of Lumeria is ___",
+          explanation:
+            "This is where hallucination becomes visible. The place sounds real, but it is made up, so a confident city name would be invented.",
+          options: [
+            ["Lumeria City", 0.62, false],
+            ["Silverport", 0.24, false],
+            ["Eldora", 0.08, false],
+            ["No reliable answer; Lumeria is fictional", 0.06, true],
+          ],
+        },
+        citation: {
+          prompt: "According to the 2029 Smith-Johnson AI Education Report, ___",
+          explanation:
+            "A dangerous case: the prompt sounds scholarly, so the model may continue in a scholarly style even if the source is fake.",
+          options: [
+            ["students improved by 43%", 0.46, false],
+            ["AI tutoring reduced gaps", 0.31, false],
+            ["the report may not exist", 0.15, true],
+            ["schools banned AI", 0.08, false],
+          ],
+        },
+      };
+
+      const modeOptions = [
+        ["good", "Good weights"],
+        ["overconfident", "Overconfident weights"],
+        ["badWeights", "Badly trained weights"],
+      ];
+
+      const modeSummaries = {
+        good:
+          "Good weights separate useful clues from misleading clues, so confidence is more reliable.",
+        overconfident:
+          "Overconfident weights make the model push its favorite answer too hard, even when the evidence is mixed.",
+        badWeights:
+          "Badly trained weights overweight weak patterns, like pointy ears, and underweight better evidence, like species-specific shape.",
+      };
+
+      const temperatureOptions = [
+        [0.3, "Low: safer, repetitive"],
+        [0.8, "Medium: balanced"],
+        [1.6, "High: creative, risky"],
+      ];
+
+      const hallucinationCauses = [
+        {
+          key: "confidence",
+          title: "Confidence is not truth",
+          short: "A high score can still be wrong.",
+          explanation:
+            "The model is measuring how well an answer fits the pattern. It is not the same as checking whether the answer is true.",
+          example:
+            "If CAT gets the highest score for a fox image, the model can sound sure while still choosing the wrong label.",
+          takeaway: "Ask: confident according to what evidence?",
+        },
+        {
+          key: "fictional",
+          title: "Sparse or fictional facts",
+          short: "Weak grounding leaves gaps.",
+          explanation:
+            "When the model has little reliable evidence, it may fill the gap with text that sounds like the right style.",
+          example:
+            "A made-up report title can lead to made-up statistics because the prompt sounds scholarly.",
+          takeaway: "Ask: does this source or fact actually exist?",
+        },
+        {
+          key: "temperature",
+          title: "Temperature changes risk",
+          short: "More adventurous choices can drift.",
+          explanation:
+            "Higher temperature gives lower-probability tokens more chances. That can be useful for creativity, but it can also pull the answer away from the safest continuation.",
+          example:
+            "For a factual question, high temperature can make a less likely answer appear even when a safer answer is available.",
+          takeaway: "Ask: should this task be creative or careful?",
+        },
+        {
+          key: "compound",
+          title: "Errors compound",
+          short: "One wrong token changes the next context.",
+          explanation:
+            "Text is generated one token at a time. Once an answer starts in the wrong direction, the next predictions build on that wrong context.",
+          example:
+            "A wrong invented name can make the rest of the sentence explain and defend that invented name.",
+          takeaway: "Ask: did the answer start drifting earlier?",
+        },
+      ];
+
+      const reviewQuestions = [
+        {
+          key: "pixels",
+          question: "You see a cat face, but the model sees a grid of colored numbers. Why does the pixel map matter before the detectors vote?",
+          answer:
+            "Because the model has to turn the picture into numerical input before it can look for patterns like ears, eyes, whiskers, or texture.",
+          why: "The pixel map is the bridge between what humans see as an image and what the model can score as evidence.",
+        },
+        {
+          key: "weights",
+          question: "What does a model weight do?",
+          answer:
+            "It controls how strongly a clue pushes the model toward or away from an answer.",
+          why: "Good weights make useful clues matter more and misleading clues matter less.",
+        },
+        {
+          key: "confidence",
+          question: "If the model predicts CAT with 92% confidence but the image is FOX, what happened?",
+          answer:
+            "A confident mistake: the model picked the most likely answer according to its scores, but it was wrong.",
+          why: "Confidence is a probability score, not automatic truth.",
+        },
+        {
+          key: "token",
+          question: "What is a token?",
+          answer:
+            "A chunk of text: sometimes a word, part of a word, number, or punctuation mark.",
+          why: "Language models predict the next token, then repeat that process many times.",
+        },
+        {
+          key: "temperature",
+          question: "What happens when temperature goes up?",
+          answer:
+            "Lower-probability tokens get more chances to appear.",
+          why: "That can make writing more varied, but it can also increase hallucination risk.",
+        },
+        {
+          key: "verify",
+          question: "An AI answer gives a fake report title and a confident statistic. What should you do before using it in a project?",
+          answer:
+            "Check whether the report exists and whether the statistic appears in a reliable source before trusting it.",
+          why: "The answer may fit the pattern of scholarly writing while still being invented.",
+        },
+      ];
+
+      const state = {
+        imageKey: "cat",
+        mode: "good",
+        tokenKey: "peanut",
+        temperature: 0.8,
+        activeCause: "confidence",
+        openReview: null,
+      };
+
+      function softmaxFromScores(scores) {
+        const entries = Object.entries(scores);
+        const max = Math.max(...entries.map(([, value]) => value));
+        const exps = entries.map(([key, value]) => [key, Math.exp(value - max)]);
+        const sum = exps.reduce((total, [, value]) => total + value, 0);
+        return exps
+          .map(([key, value]) => [key, value / sum])
+          .sort((a, b) => b[1] - a[1]);
+      }
+
+      function applyTemperature(options, temperature) {
+        const safeTemp = Math.max(0.2, temperature);
+        const adjusted = options.map(([label, probability, correct]) => [
+          label,
+          Math.pow(probability, 1 / safeTemp),
+          correct,
+        ]);
+        const sum = adjusted.reduce((total, [, probability]) => total + probability, 0);
+        return adjusted
+          .map(([label, probability, correct]) => [label, probability / sum, correct])
+          .sort((a, b) => b[1] - a[1]);
+      }
+
+      function adjustedClassScores(image, imageKey, mode) {
+        const base = { ...image.classScores };
+        if (mode === "overconfident") {
+          const top = Object.entries(base).sort((a, b) => b[1] - a[1])[0][0];
+          base[top] += 2.4;
+        }
+        if (mode === "badWeights") {
+          base.CAT += imageKey === "dog" || imageKey === "fox" ? 2.8 : 0.4;
+          base.DOG -= 0.7;
+          base.OTHER -= 0.6;
+        }
+        return base;
+      }
+
+      function renderPixelMap() {
+        const image = examples[state.imageKey];
+        const pixelMap = pixelMaps[state.imageKey];
+        const grid = document.getElementById("pixelGrid");
+        const samples = document.getElementById("pixelSamples");
+
+        document.getElementById("pixelEmoji").textContent = image.emoji;
+        document.getElementById("pixelName").textContent = image.name;
+
+        grid.style.gridTemplateColumns = `repeat(${pixelMap.rows[0].length}, minmax(0, 1fr))`;
+        grid.setAttribute(
+          "aria-label",
+          `Low-resolution pixel map for ${image.name}`,
+        );
+        grid.replaceChildren(
+          ...pixelMap.rows.flatMap((row) =>
+            [...row].map((key) => {
+              const cell = document.createElement("span");
+              cell.className = "pixel";
+              cell.style.background = pixelMap.palette[key] || pixelMap.palette["."];
+              return cell;
+            }),
+          ),
+        );
+
+        samples.replaceChildren(
+          ...pixelMap.samples.map(([label, value, color]) => {
+            const row = document.createElement("div");
+            const swatch = document.createElement("span");
+            const name = document.createElement("span");
+            const number = document.createElement("span");
+
+            row.className = "sample-row";
+            swatch.className = "sample-swatch";
+            swatch.style.background = color;
+            name.textContent = label;
+            number.className = "sample-value";
+            number.textContent = value;
+
+            row.append(swatch, name, number);
+            return row;
+          }),
+        );
+      }
+
+      function button(text, isActive, onClick, className = "pill") {
+        const el = document.createElement("button");
+        el.type = "button";
+        el.className = `${className}${isActive ? " active" : ""}`;
+        el.textContent = text;
+        el.addEventListener("click", onClick);
+        return el;
+      }
+
+      function renderChoices() {
+        const imageChoices = document.getElementById("imageChoices");
+        imageChoices.replaceChildren(
+          ...Object.entries(examples).map(([key, item]) => {
+            const el = document.createElement("button");
+            el.type = "button";
+            el.className = `choice${state.imageKey === key ? " active" : ""}`;
+            el.innerHTML = `<span class="emoji">${item.emoji}</span><span class="label">${item.name}</span>`;
+            el.addEventListener("click", () => {
+              state.imageKey = key;
+              render();
+            });
+            return el;
+          }),
+        );
+
+        const modeChoices = document.getElementById("modeChoices");
+        const modeSlider = document.getElementById("modeSlider");
+        const modeSummary = document.getElementById("modeSummary");
+        const modeIndex = Math.max(
+          0,
+          modeOptions.findIndex(([key]) => key === state.mode),
+        );
+
+        modeSlider.value = modeIndex;
+        modeSlider.oninput = (event) => {
+          state.mode = modeOptions[Number(event.target.value)][0];
+          render();
+        };
+
+        modeChoices.replaceChildren(
+          ...modeOptions.map(([key, label], index) => {
+            const el = document.createElement("button");
+            el.type = "button";
+            el.className = `slider-label${state.mode === key ? " active" : ""}`;
+            el.textContent = label;
+            el.addEventListener("click", () => {
+              state.mode = key;
+              render();
+            });
+            if (state.mode === key) {
+              el.setAttribute("aria-current", "true");
+            }
+            return el;
+          }),
+        );
+        modeSummary.textContent = modeSummaries[state.mode];
+
+        const tokenChoices = document.getElementById("tokenChoices");
+        tokenChoices.replaceChildren(
+          ...Object.entries(tokenExamples).map(([key, item]) => {
+            const el = document.createElement("button");
+            el.type = "button";
+            el.className = `choice token-choice${state.tokenKey === key ? " active" : ""}`;
+            el.textContent = item.prompt;
+            el.addEventListener("click", () => {
+              state.tokenKey = key;
+              render();
+            });
+            return el;
+          }),
+        );
+
+        const temperatureChoices = document.getElementById("temperatureChoices");
+        temperatureChoices.replaceChildren(
+          ...temperatureOptions.map(([value, label]) =>
+            button(label, state.temperature === value, () => {
+              state.temperature = value;
+              render();
+            }),
+          ),
+        );
+      }
+
+      function renderBars(targetId, probabilities, options = {}) {
+        const target = document.getElementById(targetId);
+        target.replaceChildren(
+          ...probabilities.map(([label, probability, isCorrect]) => {
+            const row = document.createElement("div");
+            row.className = "bar-row";
+            const percent = Math.round(probability * 100);
+            const fillClass = options.markCorrect && !isCorrect ? "bar-fill alt" : "bar-fill";
+            row.innerHTML = `
+              <div class="bar-meta">
+                <span class="bar-label">${label}${isCorrect ? " ✓" : ""}</span>
+                <span class="bar-value">${percent}%</span>
+              </div>
+              <div class="bar-track"><div class="${fillClass}" style="width: ${percent}%"></div></div>
+            `;
+            return row;
+          }),
+        );
+      }
+
+      function renderImageSection() {
+        const image = examples[state.imageKey];
+        const adjustedScores = adjustedClassScores(image, state.imageKey, state.mode);
+        const classProbs = softmaxFromScores(adjustedScores);
+        const [topClass, topProb] = classProbs[0];
+        const correct = topClass === image.correct;
+
+        document.getElementById("featureEmoji").textContent = image.emoji;
+        renderPixelMap();
+
+        document.getElementById("clueRows").replaceChildren(
+          ...image.clueVotes.map(([feature, match, vote, meaning]) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${feature}</td>
+              <td>${match}</td>
+              <td class="vote ${vote >= 0 ? "positive" : "negative"}">${vote > 0 ? "+" : ""}${vote.toFixed(1)}</td>
+              <td class="subtle">${meaning}</td>
+            `;
+            return row;
+          }),
+        );
+
+        renderBars("classBars", classProbs);
+        renderWorkedCalculation(topClass, adjustedScores, topProb);
+
+        const classResult = document.getElementById("classResult");
+        classResult.className = `result ${correct ? "ok" : "bad"}`;
+        classResult.innerHTML = `
+          <p class="eyebrow">Prediction</p>
+          <p class="prediction">${topClass}</p>
+          <p style="margin-top: 8px">Confidence: ${Math.round(topProb * 100)}%</p>
+          <p style="margin-top: 12px"><b>Correct label:</b> ${image.correct}</p>
+          ${correct ? "" : `<p style="margin-top: 10px; font-weight: 800">This is a hallucination-style error: confident, plausible, but wrong.</p>`}
+        `;
+      }
+
+      function renderWorkedCalculation(label, scores, probability) {
+        const score = scores[label];
+        const exponentValue = Math.exp(score);
+        const exponentSum = Object.values(scores).reduce(
+          (total, value) => total + Math.exp(value),
+          0,
+        );
+        const rows = [
+          ["Top score", `${label}: s = ${score.toFixed(1)}`],
+          ["Exponentiate", `e^${score.toFixed(1)} = ${exponentValue.toFixed(1)}`],
+          ["Compare all", `${exponentValue.toFixed(1)} / ${exponentSum.toFixed(1)}`],
+          ["Result", `${Math.round(probability * 100)}% confidence`],
+        ];
+
+        document.getElementById("workedCalc").replaceChildren(
+          ...rows.map(([name, value], index) => {
+            const row = document.createElement("div");
+            row.className = `calc-row${index === rows.length - 1 ? " calc-result" : ""}`;
+            row.innerHTML = `<span>${name}</span><b>${value}</b>`;
+            return row;
+          }),
+        );
+      }
+
+      function renderTokenSteps(token, tokenProbs) {
+        const topToken = tokenProbs[0];
+        const runnerUp = tokenProbs[1];
+        const completedPrompt = token.prompt.replace("___", topToken[0]);
+        const steps = [
+          [
+            "Read the context",
+            `The model turns "${token.prompt}" into tokens and uses that context to score possible next chunks of text.`,
+          ],
+          [
+            "Score many possible tokens",
+            `"${topToken[0]}" is currently highest at ${Math.round(topToken[1] * 100)}%, with "${runnerUp[0]}" behind it at ${Math.round(runnerUp[1] * 100)}%.`,
+          ],
+          [
+            "Choose one, then repeat",
+            `After choosing a token, the draft becomes "${completedPrompt}". That new text becomes the context for the next prediction.`,
+          ],
+        ];
+
+        document.getElementById("tokenSteps").replaceChildren(
+          ...steps.map(([title, text], index) => {
+            const card = document.createElement("div");
+            card.className = "step-card";
+            card.innerHTML = `
+              <span class="step-number">${index + 1}</span>
+              <span>
+                <b>${title}</b>
+                <p>${text}</p>
+              </span>
+            `;
+            return card;
+          }),
+        );
+      }
+
+      function renderTokenCalculation(token, tokenProbs) {
+        const [label, adjustedProbability] = tokenProbs[0];
+        const original = token.options.find(([option]) => option === label);
+        const originalProbability = original ? original[1] : adjustedProbability;
+        const temperaturePower = 1 / state.temperature;
+        const adjustedWeight = Math.pow(originalProbability, temperaturePower);
+        const adjustedSum = token.options.reduce(
+          (total, [, probability]) => total + Math.pow(probability, temperaturePower),
+          0,
+        );
+        const rows = [
+          ["Current token", `"${label}"`],
+          ["Original p", `${Math.round(originalProbability * 100)}%`],
+          [
+            "Apply T",
+            `${originalProbability.toFixed(2)}^(1/${state.temperature.toFixed(1)}) = ${adjustedWeight.toFixed(3)}`,
+          ],
+          ["Normalize", `${adjustedWeight.toFixed(3)} / ${adjustedSum.toFixed(3)}`],
+          ["New p", `${Math.round(adjustedProbability * 100)}%`],
+        ];
+
+        document.getElementById("tokenCalc").replaceChildren(
+          ...rows.map(([name, value], index) => {
+            const row = document.createElement("div");
+            row.className = `calc-row${index === rows.length - 1 ? " calc-result" : ""}`;
+            row.innerHTML = `<span>${name}</span><b>${value}</b>`;
+            return row;
+          }),
+        );
+      }
+
+      function renderHallucinationCards() {
+        const choices = document.getElementById("hallucinationChoices");
+        const detail = document.getElementById("hallucinationDetail");
+        const active =
+          hallucinationCauses.find((item) => item.key === state.activeCause) ||
+          hallucinationCauses[0];
+
+        choices.replaceChildren(
+          ...hallucinationCauses.map((item) => {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = `cause-card${item.key === active.key ? " active" : ""}`;
+            card.innerHTML = `
+              <h4>${item.title}</h4>
+              <p>${item.short}</p>
+            `;
+            card.addEventListener("click", () => {
+              state.activeCause = item.key;
+              renderHallucinationCards();
+            });
+            if (item.key === active.key) {
+              card.setAttribute("aria-current", "true");
+            }
+            return card;
+          }),
+        );
+
+        detail.innerHTML = `
+          <p class="eyebrow">Selected cause</p>
+          <h3>${active.title}</h3>
+          <p>${active.explanation}</p>
+          <div class="example-box">
+            <h4>What this looks like</h4>
+            <p>${active.example}</p>
+          </div>
+        `;
+      }
+
+      function renderReviewCards() {
+        const target = document.getElementById("reviewCards");
+
+        target.replaceChildren(
+          ...reviewQuestions.map((item, index) => {
+            const isOpen = state.openReview === item.key;
+            const card = document.createElement("article");
+            card.className = `review-card${isOpen ? " open" : ""}`;
+            card.innerHTML = `
+              <p class="eyebrow">Question ${index + 1}</p>
+              <h3>${item.question}</h3>
+              <button type="button" class="pill">${isOpen ? "Hide answer" : "Show answer"}</button>
+              <div class="answer-panel">
+                <h4>Answer</h4>
+                <p><b>${item.answer}</b></p>
+                <p>${item.why}</p>
+              </div>
+            `;
+            card.querySelector("button").addEventListener("click", () => {
+              state.openReview = isOpen ? null : item.key;
+              renderReviewCards();
+            });
+            return card;
+          }),
+        );
+      }
+
+      function renderTokenSection() {
+        const token = tokenExamples[state.tokenKey];
+        const tokenProbs = applyTemperature(token.options, state.temperature);
+        const topToken = tokenProbs[0];
+
+        document.getElementById("promptBox").textContent = token.prompt;
+        document.getElementById("tokenExplanation").textContent = token.explanation;
+        renderTokenSteps(token, tokenProbs);
+        renderTokenCalculation(token, tokenProbs);
+        renderBars("tokenBars", tokenProbs, { markCorrect: true });
+
+        const tokenResult = document.getElementById("tokenResult");
+        tokenResult.className = `result ${topToken[2] ? "ok" : "bad"}`;
+        tokenResult.innerHTML = `
+          <p class="eyebrow">Most likely token after temperature</p>
+          <p class="prediction">${topToken[0]}</p>
+          ${topToken[2] ? "" : `<p style="margin-top: 10px; font-weight: 800">Possible hallucination: the most likely continuation is not necessarily true.</p>`}
+        `;
+      }
+
+      function render() {
+        renderChoices();
+        renderImageSection();
+        renderTokenSection();
+        renderHallucinationCards();
+        renderReviewCards();
+      }
+
+      render();
+    </script>
+  </body>
+</html>
