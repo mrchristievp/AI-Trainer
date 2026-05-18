@@ -1302,7 +1302,7 @@
             ["Floppy ears", "No match", -0.4, "Not much dog evidence."],
             ["Dog-like nose shape", "Moderate match", -0.8, "Some counterevidence."],
           ],
-          classScores: { CAT: 2.4, DOG: 0.9, FOX: 2.0, OTHER: -0.7 },
+          classScores: { CAT: 2.25, DOG: 0.6, FOX: 2.45, OTHER: -0.7 },
         },
         mug: {
           name: "Mug",
@@ -1349,16 +1349,16 @@
         },
         dog: {
           rows: [
-            "B........B",
-            "BB......BB",
+            "BBBTTTTBBB",
+            "BBTTTTTTBB",
             "BTTTTTTTTB",
-            "BTTDDDDTTB",
-            "TTTTTTTTTT",
-            "TTTTPPTTTT",
-            "TTTTDDTTTT",
+            ".TTDTTDTT.",
             ".TTTTTTTT.",
+            ".TTTDDTTT.",
+            "..TTPPTT..",
             "..TTTTTT..",
-            "...BBBB...",
+            "...TTTT...",
+            "....BB....",
           ],
           palette: {
             ".": "#f8fafc",
@@ -1621,8 +1621,12 @@
       function adjustedClassScores(image, imageKey, mode) {
         const base = { ...image.classScores };
         if (mode === "overconfident") {
-          const top = Object.entries(base).sort((a, b) => b[1] - a[1])[0][0];
-          base[top] += 2.4;
+          if (imageKey === "fox") {
+            base.CAT += 2.4;
+          } else {
+            const top = Object.entries(base).sort((a, b) => b[1] - a[1])[0][0];
+            base[top] += 2.4;
+          }
         }
         if (mode === "badWeights") {
           base.CAT += imageKey === "dog" || imageKey === "fox" ? 2.8 : 0.4;
